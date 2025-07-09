@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Box Sorter</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" 
+  integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSF7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" 
+  crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@400;600&display=swap');
+    @import url('https://fonts.cdnfonts.com/css/jungle-fever');
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+      background: linear-gradient(135deg, rgba(0, 50, 0, 0.7), rgba(0, 50, 0, 0.7)), url('https://images.unsplash.com/photo-1518709268805-4e9042af592e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      font-family: 'JungleFever', sans-serif;
+      font-size: 3.5rem;
+      margin: 5px 0;
+      text-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00;
+      color: #ffcc00;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 900px;
+      margin: 5px 0;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      background: url('https://via.placeholder.com/900x50?text=Wood') no-repeat center center;
+      background-size: cover;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(255, 204, 0, 0.5);
+    }
+
+    .header div {
+      text-shadow: 0 0 5px #ffcc00;
+    }
+
+    .controls {
+      margin: 5px 0;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .controls button {
+      font-family: 'Orbitron', sans-serif;
+      background: url('https://via.placeholder.com/100x50?text=Leopard') no-repeat center center;
+      background-size: cover;
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px #ff4500;
+    }
+
+    .controls button:hover {
+      background: #ffcc00;
+      box-shadow: 0 0 15px #ffcc00;
+      transform: scale(1.05);
+    }
+
+    .game-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      margin: 5px 0;
+    }
+
+    .side-button {
+      font-family: 'Orbitron', sans-serif;
+      background: url('https://via.placeholder.com/100x50?text=Leopard') no-repeat center center;
+      background-size: cover;
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px #ff4500;
+    }
+
+    .side-button:hover {
+      background: #ffcc00;
+      box-shadow: 0 0 15px #ffcc00;
+      transform: scale(1.05);
+    }
+
+    .game-container {
+      position: relative;
+      width: 900px;
+      height: 400px;
+      margin: 0 auto;
+      border: 3px solid #ffcc00;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.9) url('https://via.placeholder.com/900x600?text=Leaves') no-repeat center center;
+      background-size: cover;
+      box-shadow: 0 0 20px rgba(255, 204, 0, 0.5);
+      overflow: hidden;
+    }
+
+    .falling-item {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      transition: transform 0.3s ease;
+      animation: wobble 2s infinite;
+    }
+
+    .falling-item:hover {
+      transform: scale(1.1);
+    }
+
+    @keyframes wobble {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(5deg); }
+      75% { transform: rotate(-5deg); }
+    }
+
+    .bins {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 10px;
+    }
+
+    .bin {
+      width: 180px;
+      height: 120px;
+      border: 2px dashed #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: bold;
+      background: #eee;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background-size: cover;
+      background-position: center;
+      color: #fff;
+      font-size: 1.1rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      text-shadow: 0 0 5px #000;
+    }
+
+    .bin:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px #ffcc00;
+    }
+
+    /* .bin.food {
+      background-image: url('https://cdn4.iconfinder.com/data/icons/international-food-2/48/01-neapolitan_pizza_italy-512.png');
+      width: 180px;
+      height: 120px;
+    }
+
+    .bin.animal {
+      background-image: url('https://cdn0.iconfinder.com/data/icons/animal-avatar-5/64/04-animal_kingdom-veterinary-mammal-pet-cat-animal-256.png');
+      width: 180px;
+      height: 120px;
+    }
+
+    .bin.object {
+      background-image: url('https://cdn3.iconfinder.com/data/icons/kitchen-objects-3/60/Kitchen_Objects_-_Ultra_-_081_-_Knife_Block-256.png');
+      width: 180px;
+      height: 120px;
+    } */
+
+    .correct {
+      background-color: rgba(106, 255, 106, 0.7);
+      box-shadow: 0 0 20px #6aff6a;
+      transform: scale(1.1);
+    }
+
+    .wrong {
+      background-color: rgba(255, 150, 150, 0.7);
+      box-shadow: 0 0 20px #ff9696;
+      transform: scale(1.1);
+    }
+
+    .game-over, .level-complete {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5em;
+      color: #ff4500;
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 50, 0, 0.9) url('https://via.placeholder.com/300x200?text=Tribal') no-repeat center center;
+      background-size: cover;
+      padding: 30px;
+      border: 3px solid #ffcc00;
+      border-radius: 15px;
+      box-shadow: 0 0 30px #ffcc00;
+      z-index: 100;
+      animation: zoomIn 0.5s ease-in-out;
+      backdrop-filter: blur(5px);
+    }
+
+    @keyframes zoomIn {
+      from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+      to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    @media (max-width: 1024px) {
+      .game-container {
+        width: 90%;
+        height: 500px;
+      }
+
+      .header {
+        font-size: 1rem;
+        padding: 8px;
+      }
+
+      .bin {
+        width: 120px;
+        height: 80px;
+        font-size: 0.9rem;
+      }
+
+      .falling-item {
+        width: 40px;
+        height: 40px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      .game-container {
+        width: 95%;
+        height: 400px;
+      }
+
+      .header {
+        flex-direction: column;
+        align-items: center;
+        font-size: 0.9rem;
+      }
+
+      .game-wrapper {
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .controls button, .side-button {
+        padding: 5px 10px;
+        font-size: 0.75rem;
+      }
+
+      .bin {
+        width: 100px;
+        height: 70px;
+        font-size: 0.8rem;
+      }
+
+      .falling-item {
+        width: 35px;
+        height: 35px;
+      }
+
+      .game-over, .level-complete {
+        font-size: 1.5em;
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🌿 Box Sorter</h1>
+  <div class="header">
+    <div>Level: <span id="level">1</span></div>
+    <div>Score: <span id="score">0</span></div>
+    <div>High Score: <span id="high-score">0</span></div>
+    <div>Lives: <span id="lives">3</span></div>
+    <div>Time: <span id="timer">30</span>s</div>
+  </div>
+
+  <div class="controls">
+    <button onclick="togglePause()"><i class="fas fa-pause"></i> Pause/Resume</button>
+    <button onclick="restartGame()"><i class="fas fa-redo-alt"></i> Restart</button>
+  </div>
+
+  <div class="game-wrapper">
+    <button class="side-button" onclick="startGame()"><i class="fas fa-play"></i> Start</button>
+    <div class="game-container" id="game"></div>
+    <button class="side-button" onclick="stopGame()"><i class="fas fa-stop"></i> Stop</button>
+  </div>
+
+  <div class="bins">
+    <div class="bin food" data-category="food">Food</div>
+    <div class="bin animal" data-category="animal">Animals</div>
+    <div class="bin object" data-category="object">Objects</div>
+  </div>
+
+  <div class="game-over" id="game-over" style="display:none;"></div>
+  <div class="level-complete" id="level-complete" style="display:none;"></div>
+
+  <script>
+    const items = [
+      { image: 'https://cdn4.iconfinder.com/data/icons/fruits-79/48/04-apple-256.png', category: 'food' },
+      { image: 'https://cdn4.iconfinder.com/data/icons/street-food-4/48/30-Fast_food-256.png', category: 'food' },
+      {image:'https://cdn4.iconfinder.com/data/icons/international-food-2/48/26-ice_cream-256.png',category:'food'},
+      {image:'https://cdn2.iconfinder.com/data/icons/cooking-56/64/18-chopping_board-cutting_board-chopping-cooker-knife-cut-256.png',category:'food'},
+      {image:'https://cdn1.iconfinder.com/data/icons/grocery-14/64/paper_bag-market-shopping-food-water-grocery_bag-256.png',category:'food'},
+      { image: 'https://cdn0.iconfinder.com/data/icons/dog-and-cat-4/64/09-greyhound-canine-puppy-pets-avatar-animals-animal-dog-256.png', category: 'animal' },
+      { image: 'https://cdn0.iconfinder.com/data/icons/dog-and-cat-4/64/18-persian-kitty-pets-cat-avatar-animal-256.png', category: 'animal' },
+      { image: 'https://cdn0.iconfinder.com/data/icons/animal-avatar-5/64/20-wild_life-animal_kingdom-wildlife-wild-lion-animals-animal-256.png', category: 'animal' },
+      { image: 'https://cdn0.iconfinder.com/data/icons/animal-avatar-5/64/19-wild_life-animal_kingdom-carnivore-wildlife-predator-tiger-avatar-256.png', category: 'animal' },
+      { image: 'https://cdn0.iconfinder.com/data/icons/animal-avatar-5/64/18-wild_life-animal_kingdom-wildlife-monkey-wild-animals-animal-256.png', category: 'animal' },
+      { image: 'https://cdn3.iconfinder.com/data/icons/bathroom-objects-flat-collection/60/Bathroom_Objects_-_Flat_-_074_-_Toothbrush_holder-256.png', category: 'object' },
+      { image: 'https://cdn1.iconfinder.com/data/icons/locations-redesign/48/Gadgets1-256.png', category: 'object' },
+      { image: 'https://cdn1.iconfinder.com/data/icons/electronics-and-devices-22/32/electronics_watches_wrist_watches_smart_watches_mobile_phone_smart_phone-256.png', category: 'object' },
+      { image: 'https://cdn4.iconfinder.com/data/icons/postal-service-6/64/delivery_bike-shipping-delivery-motorbiking-transport-256.png', category: 'object' },
+      { image: 'https://cdn4.iconfinder.com/data/icons/hardware-and-devices/64/Hardware_devices_camera-256.png', category: 'object' }
+    ];
+
+    const game = document.getElementById("game");
+    const levelEl = document.getElementById("level");
+    const scoreEl = document.getElementById("score");
+    const highScoreEl = document.getElementById("high-score");
+    const livesEl = document.getElementById("lives");
+    const timerEl = document.getElementById("timer");
+    const gameOverEl = document.getElementById("game-over");
+    const levelCompleteEl = document.getElementById("level-complete");
+
+    let score = 0;
+    let lives = 3;
+    let timer = 30;
+    let currentLevel = 1;
+    let paused = false;
+    let gameActive = false;
+    let gameStarted = false;
+    let fallIntervalID, timerIntervalID;
+
+    const levelSettings = [
+      { timer: 30, fallSpeed: 30 },
+      { timer: 25, fallSpeed: 25 },
+      { timer: 20, fallSpeed: 20 }
+    ];
+
+    let fallSpeed = levelSettings[0].fallSpeed;
+    timer = levelSettings[0].timer;
+
+    let highScore = localStorage.getItem("boxSorterHighScore") || 0;
+    highScoreEl.textContent = highScore;
+
+    updateUI();
+
+    function updateUI() {
+      scoreEl.textContent = parseInt(score);
+      levelEl.textContent = currentLevel;
+      livesEl.textContent = lives;
+      timerEl.textContent = timer;
+      console.log(`UI Updated: Score=${score}, Level=${currentLevel}, Lives=${lives}, Timer=${timer}`);
+    }
+
+    function createFallingItem() {
+      if (!gameActive || !gameStarted || paused || lives <= 0 || timer <= 0) return;
+
+      const item = items[Math.floor(Math.random() * items.length)];
+      const div = document.createElement("div");
+      div.className = "falling-item";
+      div.style.left = `${Math.random() * 850}px`;
+      div.dataset.category = item.category;
+      div.setAttribute("draggable", "true");
+      const img = document.createElement("img");
+      img.src = item.image;
+      img.style.width = "100%";
+      img.style.height = "100%";
+      img.style.objectFit = "cover";
+      div.appendChild(img);
+      game.appendChild(div);
+
+      let top = 0;
+      const fallInterval = setInterval(() => {
+        if (!game.contains(div) || paused || !gameActive) {
+          clearInterval(fallInterval);
+          return;
+        }
+
+        top += 2;
+        div.style.top = `${top}px`;
+
+        if (top > 600) {
+          clearInterval(fallInterval);
+          if (game.contains(div)) {
+            div.remove();
+            lives--;
+            score = Math.max(0, score - 5);
+            console.log(`Item missed! Score=${score}, Lives=${lives}`);
+            updateUI();
+            checkGameOver();
+          }
+        }
+      }, fallSpeed);
+
+      div.ondragstart = e => {
+        e.dataTransfer.setData("text/plain", div.dataset.category);
+        console.log(`Drag started: Category=${div.dataset.category}`);
+        div.style.opacity = "0.5";
+      };
+      div.ondragend = e => {
+        div.style.opacity = "1";
+        game.removeChild(div);
+        console.log(`Drag ended: Item removed`);
+      };
+
+      let touchStartX, touchStartY;
+      div.addEventListener("touchstart", e => {
+        e.preventDefault();
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        div.style.opacity = "0.5";
+        console.log(`Touch started: Category=${div.dataset.category}`);
+      });
+      div.addEventListener("touchmove", e => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        div.style.left = `${touch.clientX - 25}px`;
+        div.style.top = `${touch.clientY - 25}px`;
+      });
+      div.addEventListener("touchend", e => {
+        div.style.opacity = "1";
+        const touch = e.changedTouches[0];
+        const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (dropTarget && dropTarget.classList.contains("bin")) {
+          const draggedCategory = div.dataset.category;
+          const targetCategory = dropTarget.dataset.category;
+          console.log(`Touch drop: Dragged=${draggedCategory}, Target=${targetCategory}`);
+          handleDrop(draggedCategory, targetCategory, dropTarget);
+        }
+        game.removeChild(div);
+        console.log(`Touch ended: Item removed`);
+      });
+    }
+
+    const bins = document.querySelectorAll(".bin");
+
+    bins.forEach(bin => {
+      bin.ondragover = e => {
+        e.preventDefault();
+        console.log(`Drag over bin: ${bin.dataset.category}`);
+      };
+      bin.ondrop = e => {
+        e.preventDefault();
+        if (!gameActive || paused) {
+          console.log(`Drop ignored: GameActive=${gameActive}, Paused=${paused}`);
+          return;
+        }
+        const draggedCategory = e.dataTransfer.getData("text/plain");
+        console.log(`Drop on bin: Dragged=${draggedCategory}, Target=${bin.dataset.category}`);
+        handleDrop(draggedCategory, bin.dataset.category, bin);
+      };
+    });
+
+    function handleDrop(dragged, target, bin) {
+      if (!gameActive || paused) {
+        console.log(`handleDrop skipped: GameActive=${gameActive}, Paused=${paused}`);
+        return;
+      }
+
+      console.log(`Processing drop: Dragged=${dragged}, Target=${target}`);
+      if (dragged === target) {
+        bin.classList.add("correct");
+        score += 10;
+        console.log(`Correct drop! Score=${score}, Lives=${lives}`);
+      } else {
+        bin.classList.add("wrong");
+        score = Math.max(0, score - 5);
+        lives--;
+        console.log(`Wrong drop! Score=${score}, Lives=${lives}`);
+      }
+
+      updateUI();
+      checkGameOver();
+
+      setTimeout(() => bin.classList.remove("correct", "wrong"), 500);
+    }
+
+    function checkGameOver() {
+      if (lives <= 0) {
+        gameActive = false;
+        clearInterval(fallIntervalID);
+        clearInterval(timerIntervalID);
+
+        gameOverEl.innerText = `Game Over! 🦒 Final Score: ${score}`;
+        gameOverEl.style.display = "block";
+        console.log(`Game Over! Final Score=${score}`);
+
+        if (score > highScore) {
+          highScore = score;
+          localStorage.setItem("boxSorterHighScore", score);
+          highScoreEl.textContent = score;
+          console.log(`New High Score: ${score}`);
+        }
+
+        setTimeout(() => {
+          const again = confirm("Play again?");
+          if (again) startGame();
+          else alert("Thanks for playing!");
+        }, 1000);
+      } else if (timer <= 0) {
+        endLevel();
+      }
+    }
+
+    function endLevel() {
+      gameActive = false;
+      clearInterval(fallIntervalID);
+      clearInterval(timerIntervalID);
+
+      levelCompleteEl.innerText = `Level ${currentLevel} Completed! 🦒 Score: ${score}`;
+      levelCompleteEl.style.display = "block";
+      console.log(`Level ${currentLevel} ended. Total Score=${score}, Lives=${lives}`);
+
+      if (currentLevel === 3) {
+        gameActive = false;
+        setTimeout(() => {
+          levelCompleteEl.style.display = "none";
+          gameOverEl.innerText = `Game Completed! 🌴 Final Score: ${score}`;
+          gameOverEl.style.display = "block";
+          console.log(`Game Completed! Final Score=${score}`);
+
+          if (score > highScore) {
+            highScore = score;
+            localStorage.setItem("boxSorterHighScore", score);
+            highScoreEl.textContent = score;
+            console.log(`New High Score: ${score}`);
+          }
+
+          setTimeout(() => {
+            const again = confirm("Play again?");
+            if (again) startGame();
+            else alert("Thanks for playing!");
+          }, 1000);
+        }, 2000);
+      } else {
+        setTimeout(() => {
+          levelCompleteEl.style.display = "none";
+          currentLevel++;
+          timer = levelSettings[currentLevel - 1].timer;
+          fallSpeed = levelSettings[currentLevel - 1].fallSpeed;
+          lives = 3;
+          gameActive = true;
+          updateUI();
+          startGameLoops();
+          console.log(`Starting Level ${currentLevel} with Score=${score}, Lives=${lives}`);
+        }, 2000);
+      }
+    }
+
+    function togglePause() {
+      if (!gameActive || !gameStarted) {
+        console.log(`Pause ignored: GameActive=${gameActive}, GameStarted=${gameStarted}`);
+        return;
+      }
+      paused = !paused;
+      console.log(`Game ${paused ? 'paused' : 'resumed'}, Score=${score}, Lives=${lives}`);
+    }
+
+    function startGame() {
+      score = 0;
+      lives = 3;
+      currentLevel = 1;
+      timer = levelSettings[0].timer;
+      fallSpeed = levelSettings[0].fallSpeed;
+      gameActive = true;
+      gameStarted = true;
+      paused = false;
+      game.innerHTML = '';
+      gameOverEl.style.display = "none";
+      levelCompleteEl.style.display = "none";
+      updateUI();
+      startGameLoops();
+      console.log(`Game started! Initial Score=${score}, Lives=${lives}`);
+    }
+
+    function stopGame() {
+      gameActive = false;
+      paused = false;
+      clearInterval(fallIntervalID);
+      clearInterval(timerIntervalID);
+      game.innerHTML = '';
+      gameOverEl.style.display = "none";
+      levelCompleteEl.style.display = "none";
+      console.log(`Game stopped! Score=${score}, Lives=${lives}`);
+    }
+
+    function restartGame() {
+      startGame();
+    }
+
+    function startGameLoops() {
+      if (!gameStarted || !gameActive) return;
+
+      fallIntervalID = setInterval(() => {
+        if (!paused && gameActive) {
+          createFallingItem();
+        }
+      }, 1500);
+
+      timerIntervalID = setInterval(() => {
+        if (!paused && gameActive) {
+          timer--;
+          updateUI();
+          if (timer <= 0) {
+            checkGameOver();
+          }
+        }
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
